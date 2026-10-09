@@ -1,0 +1,728 @@
+esphome:
+  name: alarm-panel-oled
+  friendly_name: Alarm Panel (OLED)
+  comment: "ideaspark ESP32 0.96in OLED — 12 zone alarm panel replacement"
+  project:
+    name: "diy.alarm-panel-oled"
+    version: "1.0.0"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# ==============================================================
+# NETWORK
+# ==============================================================
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  domain: !secret wifi_domain
+  ap:
+    ssid: "AlarmPanel-OLED-AP"
+    password: !secret ap_password
+  reboot_timeout:
+    seconds: 30
+
+captive_portal:
+
+logger:
+  # level: INFO
+  # baud_rate: 115200   # GPIO1 (TX) / GPIO3 (RX) reserved for serial
+
+api:
+  reboot_timeout: 30s  
+  encryption:
+    key: !secret encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+button:
+  - platform: restart
+    name: "Restart"
+    icon: "mdi:restart"
+    
+# ==============================================================
+# PIN ALLOCATION REFERENCE
+# ==============================================================
+# AVOIDED:
+#   GPIO 0        — strapping pin (LOW = flash mode)
+#   GPIO 1        — UART0 TX (logger / programming)
+#   GPIO 2        — strapping pin; safe as output AFTER boot only
+#   GPIO 3        — UART0 RX (logger / programming)
+#   GPIO 6–11     — internal SPI flash (NEVER USE)
+#   GPIO 12       — strapping pin (HIGH at boot = wrong flash voltage)
+#   GPIO 15       — strapping pin (UART0 output enable)
+#   GPIO 21       — I2C SDA (integrated OLED display)
+#   GPIO 22       — I2C SCL (integrated OLED display)
+#
+# ZONE INPUTS (internal pull-up, Normally Closed reed switches):
+#   GPIO 4,5,13,14,16,17,18,19,23,25,26,27 — Zones 01–12
+#
+# OUTPUTS:
+#   GPIO 32       — Siren / alarm relay output
+#   GPIO 33       — Armed status indicator LED output
+#   GPIO 2        — Onboard LED (active-LOW on most ESP32 dev boards)
+# ==============================================================
+
+# ==============================================================
+# I2C BUS  (ideaspark integrated OLED)
+# ==============================================================
+# Confirmed pins for the ideaspark ESP32 OLED board:
+#   SDA = GPIO21 / SCL = GPIO22 / Address = 0x3C / Controller = SSD1306
+#
+# If the display stays blank, try:
+#   • Address 0x3D  (some modules ship with this address)
+#   • model: "SH1106 128x64"  (same physical size, different controller)
+# ==============================================================
+
+i2c:
+  sda: GPIO21
+  scl: GPIO22
+  scan: true
+  id: bus_a
+
+# ==============================================================
+# FONT
+# ==============================================================
+# Roboto Mono is downloaded from Google Fonts at first compile.
+# Only the glyphs listed below are included to keep firmware small.
+# ==============================================================
+
+font:
+  - file: "gfonts://Roboto Mono"
+    id: font8
+    size: 11
+    glyphs: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.: !"
+  # MDI icon font — only two glyphs loaded to keep firmware small.
+  # Downloaded from CDN at compile time; requires internet access during build.
+  - file: "https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/fonts/materialdesignicons-webfont.ttf"
+    id: font_mdi
+    size: 11
+    glyphs:
+      - "\U000F05A9"  # mdi:wifi
+      - "\U000F05AA"  # mdi:wifi-off
+
+# ==============================================================
+# DISPLAY  (128 × 64 pixels)
+# ==============================================================
+# Screen layout (font size 11, no dividers, rows at 16 px intervals):
+#
+#   y= 0   WiFi: 192.168.1.100        ← WiFi label + IP or "Disconnected"
+#   y=16   Open: 1 2 3 4 5 6 7 8 9 A B C   ← open zones (contact broken)
+#   y=32   Clsd: 1 2 3 4 5 6 7 8 9 A B C   ← closed zones (contact intact)
+#   y=48   Disarmed                   ← alarm panel state
+#
+# Zone display labels (fixed horizontal positions, zone slot = 7 px):
+#   Zones 01–09 → "1"–"9"
+#   Zone  10    → "A"   (hex-style to keep single-character width)
+#   Zone  11    → "B"
+#   Zone  12    → "C"
+#
+# Each label occupies a fixed x position. When a zone is open (reed
+# switch circuit broken) the label rises into the Open row; when the
+# zone is closed (circuit intact) it drops into the Closed row.
+#
+# x positions (label start x=37, 7 px per slot):
+#   Z01=37  Z02=44  Z03=51  Z04=58  Z05=65  Z06=72
+#   Z07=79  Z08=86  Z09=93  Z10=100 Z11=107 Z12=114
+# ==============================================================
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    address: 0x3C
+    id: oled_display
+    update_interval: 1000ms
+    lambda: |-
+      // ── WiFi Row ──────────────────────────────────────────
+      // MDI icon at x=0 (~11 px). Text centred using TextAlign::TOP_CENTER:
+      //   Connected:    centre = (13+104)/2 = 58  (between icon and bars)
+      //   Disconnected: centre = (13+127)/2 = 70  (between icon and edge)
+      if (wifi::global_wifi_component->is_connected()) {
+        it.print(0, 0, id(font_mdi), "\U000F05A9");  // mdi:wifi
+        it.print(58, 0, id(font8), TextAlign::TOP_CENTER, id(wifi_ip).state.c_str());
+        float rssi = id(wifi_signal_db).state;
+        int bars = isnan(rssi) ? 0 : (rssi > -55 ? 4 : rssi > -65 ? 3 : rssi > -75 ? 2 : 1);
+        const int bx[4] = {104, 110, 116, 122};
+        const int bh[4] = {  4,   6,   8,  10};
+        for (int b = 0; b < 4; b++) {
+          int ty = 11 - bh[b];
+          if (b < bars) it.filled_rectangle(bx[b], ty, 5, bh[b]);
+          else          it.rectangle(bx[b], ty, 5, bh[b]);
+        }
+      } else {
+        it.print(0, 0, id(font_mdi), "\U000F05AA");  // mdi:wifi-off
+        it.print(70, 0, id(font8), TextAlign::TOP_CENTER, "Disconnected");
+      }
+
+      // ── Row Labels ────────────────────────────────────────
+      it.print(0, 16, id(font8), "Open:");
+      it.print(0, 32, id(font8), "Clsd:");
+
+      // ── Zone Characters ───────────────────────────────────
+      // Each zone occupies a fixed x column. The label appears in the
+      // Open row (y=16) when the zone is triggered, or the Closed row
+      // (y=32) when normal. Zones 10-12 use A/B/C to stay single-width.
+      // Disabled zones render nothing — their column stays blank.
+      const bool states[12] = {
+        id(zone_01).state, id(zone_02).state, id(zone_03).state,
+        id(zone_04).state, id(zone_05).state, id(zone_06).state,
+        id(zone_07).state, id(zone_08).state, id(zone_09).state,
+        id(zone_10).state, id(zone_11).state, id(zone_12).state
+      };
+      const bool enabled[12] = {
+        id(sw_zone_01).state, id(sw_zone_02).state, id(sw_zone_03).state,
+        id(sw_zone_04).state, id(sw_zone_05).state, id(sw_zone_06).state,
+        id(sw_zone_07).state, id(sw_zone_08).state, id(sw_zone_09).state,
+        id(sw_zone_10).state, id(sw_zone_11).state, id(sw_zone_12).state
+      };
+      const char* labels[12] = {
+        "1","2","3","4","5","6","7","8","9","A","B","C"
+      };
+      const int open_y = 16;
+      const int clsd_y = 32;
+      const int x0     = 37;
+      const int slot   =  7;
+
+      for (int i = 0; i < 12; i++) {
+        if (enabled[i]) {
+          it.print(x0 + i * slot, states[i] ? open_y : clsd_y, id(font8), labels[i]);
+        }
+      }
+
+      // ── Alarm State Row ───────────────────────────────────
+      // State codes (ESPHome AlarmControlPanelState enum):
+      //   0=Disarmed  1=ArmedHome  2=ArmedAway
+      //   6=Pending   7=Arming     9=Triggered
+      const char* state_str;
+      switch (static_cast<int>(id(alarm_panel).get_state())) {
+        case 0:  state_str = "Disarmed";   break;
+        case 1:  state_str = "Armed Home"; break;
+        case 2:  state_str = "Armed Away"; break;
+        case 6:  state_str = "Pending..."; break;
+        case 7:  state_str = "Arming...";  break;
+        case 9:  state_str = "TRIGGERED!"; break;
+        default: state_str = "---";        break;
+      }
+      it.print(0, 48, id(font8), state_str);
+
+# ==============================================================
+# OUTPUTS
+# ==============================================================
+
+output:
+  - platform: gpio
+    pin: GPIO32
+    id: out_siren
+
+  - platform: gpio
+    pin: GPIO33
+    id: out_armed_led
+
+  # GPIO2 is a strapping pin; safe as output after boot.
+  - platform: gpio
+    pin: GPIO2
+    id: out_onboard_led
+
+switch:
+  - platform: output
+    name: "Siren"
+    id: siren
+    output: out_siren
+    restore_mode: ALWAYS_OFF
+    icon: "mdi:alarm-light"
+
+  - platform: output
+    name: "Armed Indicator"
+    id: armed_led
+    output: out_armed_led
+    restore_mode: ALWAYS_OFF
+    icon: "mdi:led-on"
+
+  # ── Zone Enable / Disable ──────────────────────────────────────
+  # Toggle in Home Assistant to enable or disable individual zones.
+  # A disabled zone is excluded from alarm triggering and its column
+  # is left blank on the OLED display.  State survives reboots.
+  - platform: template
+    name: "Zone 01 Enabled"
+    id: sw_zone_01
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+  - platform: template
+    name: "Zone 02 Enabled"
+    id: sw_zone_02
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+  - platform: template
+    name: "Zone 03 Enabled"
+    id: sw_zone_03
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+  - platform: template
+    name: "Zone 04 Enabled"
+    id: sw_zone_04
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+  - platform: template
+    name: "Zone 05 Enabled"
+    id: sw_zone_05
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+  - platform: template
+    name: "Zone 06 Enabled"
+    id: sw_zone_06
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+  - platform: template
+    name: "Zone 07 Enabled"
+    id: sw_zone_07
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+  - platform: template
+    name: "Zone 08 Enabled"
+    id: sw_zone_08
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+  - platform: template
+    name: "Zone 09 Enabled"
+    id: sw_zone_09
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+  - platform: template
+    name: "Zone 10 Enabled"
+    id: sw_zone_10
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+  - platform: template
+    name: "Zone 11 Enabled"
+    id: sw_zone_11
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+  - platform: template
+    name: "Zone 12 Enabled"
+    id: sw_zone_12
+    optimistic: true
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+    icon: "mdi:shield-check-outline"
+
+light:
+  - platform: binary
+    name: "Status LED"
+    id: status_led
+    output: out_onboard_led
+    effects:
+      - strobe:
+          name: "Armed Away Blink"
+          colors:
+            - state: true
+              duration: 100ms
+            - state: false
+              duration: 1900ms
+      - strobe:
+          name: "Alarm Flash"
+          colors:
+            - state: true
+              duration: 100ms
+            - state: false
+              duration: 100ms
+      - strobe:
+          name: "Arming Blink"
+          colors:
+            - state: true
+              duration: 500ms
+            - state: false
+              duration: 500ms
+
+# ==============================================================
+# ZONE SENSORS  (12 zones — GPIO21/22 reserved for OLED I2C)
+# ==============================================================
+# Wiring (all zones use internal pull-up):
+#   • Normally Closed (NC) reed switches — standard security wiring.
+#   • One terminal → GPIO pin  /  other terminal → GND.
+#   • Door/window CLOSED + magnet near  → switch CLOSED → pin LOW  → sensor OFF
+#   • Door/window OPEN  + magnet away   → switch OPEN  → pin HIGH → sensor ON
+#
+# Device class can be changed per zone:  door, window, motion, smoke, etc.
+# ==============================================================
+
+binary_sensor:
+
+  - platform: gpio
+    pin:
+      number: GPIO23
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 01"
+    id: zone_01
+    device_class: door
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: GPIO19
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 02"
+    id: zone_02
+    device_class: window
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: GPIO18
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 03"
+    id: zone_03
+    device_class: window
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  # GPIO14 outputs a brief PWM signal at boot; harmless for a reed switch input.
+  - platform: gpio
+    pin:
+      number: GPIO05
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 04"
+    id: zone_04
+    device_class: door
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: GPIO17
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 05"
+    id: zone_05
+    device_class: window
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: GPIO16
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 06"
+    id: zone_06
+    device_class: window
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: GPIO04
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 07"
+    id: zone_07
+    device_class: window
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: GPIO25
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 08"
+    id: zone_08
+    device_class: window
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: GPIO26
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 09"
+    id: zone_09
+    device_class: motion
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: GPIO27
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 10"
+    id: zone_10
+    device_class: motion
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: GPIO14
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 11"
+    id: zone_11
+    device_class: window
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: GPIO13
+      mode:
+        input: true
+        pullup: true
+    name: "Zone 12"
+    id: zone_12
+    device_class: door
+    filters:
+      - delayed_on: 50ms
+      - delayed_off: 50ms
+
+  # ── Alarm Panel Feed ──────────────────────────────────────────
+  # Internal sensors consumed only by alarm_control_panel.
+  # Each returns true only when the physical zone is open AND the
+  # corresponding zone enable switch is ON.
+  - platform: template
+    id: zone_01_alarm
+    internal: true
+    lambda: return id(sw_zone_01).state && id(zone_01).state;
+  - platform: template
+    id: zone_02_alarm
+    internal: true
+    lambda: return id(sw_zone_02).state && id(zone_02).state;
+  - platform: template
+    id: zone_03_alarm
+    internal: true
+    lambda: return id(sw_zone_03).state && id(zone_03).state;
+  - platform: template
+    id: zone_04_alarm
+    internal: true
+    lambda: return id(sw_zone_04).state && id(zone_04).state;
+  - platform: template
+    id: zone_05_alarm
+    internal: true
+    lambda: return id(sw_zone_05).state && id(zone_05).state;
+  - platform: template
+    id: zone_06_alarm
+    internal: true
+    lambda: return id(sw_zone_06).state && id(zone_06).state;
+  - platform: template
+    id: zone_07_alarm
+    internal: true
+    lambda: return id(sw_zone_07).state && id(zone_07).state;
+  - platform: template
+    id: zone_08_alarm
+    internal: true
+    lambda: return id(sw_zone_08).state && id(zone_08).state;
+  - platform: template
+    id: zone_09_alarm
+    internal: true
+    lambda: return id(sw_zone_09).state && id(zone_09).state;
+  - platform: template
+    id: zone_10_alarm
+    internal: true
+    lambda: return id(sw_zone_10).state && id(zone_10).state;
+  - platform: template
+    id: zone_11_alarm
+    internal: true
+    lambda: return id(sw_zone_11).state && id(zone_11).state;
+  - platform: template
+    id: zone_12_alarm
+    internal: true
+    lambda: return id(sw_zone_12).state && id(zone_12).state;
+
+  # Panel connectivity indicator
+  - platform: status
+    name: "Panel Online"
+
+# ==============================================================
+# ALARM CONTROL PANEL
+# ==============================================================
+# Integrates with Home Assistant as a native alarm_control_panel entity.
+#
+# bypass_armed_home: true  — zone is silent when armed in HOME mode.
+#   Typical use: true for interior motion sensors / inner hallway doors,
+#                false for perimeter doors and windows always monitored.
+#
+# Adjust timing to suit your premises:
+#   arming_away_time — exit delay (away arm)
+#   arming_home_time — exit delay (home arm, 0 = instant)
+#   pending_time     — entry delay before alarm fires
+#   trigger_time     — siren duration before auto-reset (0 = indefinite)
+# ==============================================================
+
+alarm_control_panel:
+  - platform: template
+    name: "Alarm"
+    id: alarm_panel
+    codes:
+      - !secret alarm_code_1
+      - !secret alarm_code_2
+      - !secret alarm_code_3
+      - !secret alarm_code_4
+      - !secret alarm_code_5
+      - !secret alarm_code_6
+      - !secret alarm_code_7
+      - !secret alarm_code_8
+      - !secret alarm_code_9
+      - !secret alarm_code_10
+    requires_code_to_arm: true
+    arming_away_time: 30s
+    arming_home_time: 0s
+    pending_time: 30s
+    trigger_time: 600s
+
+    binary_sensors:
+      - input: zone_01_alarm      # Perimeter — always active
+        bypass_armed_home: false
+      - input: zone_02_alarm
+        bypass_armed_home: true
+      - input: zone_03_alarm
+        bypass_armed_home: true
+      - input: zone_04_alarm      # Perimeter
+        bypass_armed_home: false
+      - input: zone_05_alarm
+        bypass_armed_home: true
+      - input: zone_06_alarm
+        bypass_armed_home: true
+      - input: zone_07_alarm
+        bypass_armed_home: true
+      - input: zone_08_alarm
+        bypass_armed_home: true
+      - input: zone_09_alarm      # Motion — bypass when home
+        bypass_armed_home: true
+      - input: zone_10_alarm      # Motion — bypass when home
+        bypass_armed_home: true
+      - input: zone_11_alarm
+        bypass_armed_home: true
+      - input: zone_12_alarm      # Perimeter
+        bypass_armed_home: false
+
+    on_triggered:
+      then:
+        - switch.turn_on: siren
+        - light.turn_on:
+            id: status_led
+            effect: "Alarm Flash"
+
+    on_arming:
+      then:
+        - switch.turn_off: siren
+        - switch.turn_off: armed_led
+        - light.turn_on:
+            id: status_led
+            effect: "Arming Blink"
+
+    on_armed_away:
+      then:
+        - switch.turn_off: siren
+        - switch.turn_on: armed_led
+        - light.turn_on:
+            id: status_led
+            effect: "Armed Away Blink"
+
+    on_armed_home:
+      then:
+        - switch.turn_off: siren
+        - switch.turn_on: armed_led
+        - light.turn_off: status_led
+
+    on_disarmed:
+      then:
+        - switch.turn_off: siren
+        - switch.turn_off: armed_led
+        - light.turn_off: status_led
+
+    on_pending:
+      then:
+        - switch.turn_off: siren
+        - light.turn_on:
+            id: status_led
+            effect: "Arming Blink"
+
+# ==============================================================
+# DIAGNOSTICS
+# ==============================================================
+
+sensor:
+  - platform: wifi_signal
+    id: wifi_signal_db
+    internal: true
+    update_interval: 5s
+  - platform: template
+    name: "WiFi Signal"
+    unit_of_measurement: dBm
+    device_class: signal_strength
+    state_class: measurement
+    accuracy_decimals: 0
+    update_interval: 60s
+    lambda: return id(wifi_signal_db).state;
+  - platform: uptime
+    name: Uptime
+    type: timestamp
+    time_id: time_homeassistant_1
+
+time:
+  - platform: homeassistant
+    id: time_homeassistant_1
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "IP Address"
+      id: wifi_ip
+    ssid:
+      name: "WiFi SSID"
