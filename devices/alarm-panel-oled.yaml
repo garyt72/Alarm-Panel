@@ -15,6 +15,20 @@ esp32:
 # NETWORK
 # ==============================================================
 
+network:
+  priority:
+    - ethernet
+    - wifi
+
+ethernet:
+  type: W5500
+  id: ethernet_net
+  clk_pin: GPIO13
+  mosi_pin: GPIO25
+  miso_pin: GPIO26
+  cs_pin: GPIO27
+  polling_interval: 10ms
+
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
@@ -60,7 +74,7 @@ button:
 #   GPIO 22       — I2C SCL (integrated OLED display)
 #
 # ZONE INPUTS (internal pull-up, Normally Closed reed switches):
-#   GPIO 4,5,13,14,16,17,18,19,23,25,26,27 — Zones 01–12
+#   GPIO 4,5,14,16,17,18,19,23,34,35,36,39 — Zones 01–12
 #
 # OUTPUTS:
 #   GPIO 32       — Siren / alarm relay output
@@ -73,6 +87,8 @@ button:
 # ==============================================================
 # Confirmed pins for the ideaspark ESP32 OLED board:
 #   SDA = GPIO21 / SCL = GPIO22 / Address = 0x3C / Controller = SSD1306
+#
+# Ethernet uses GPIO13 / GPIO25 / GPIO26 / GPIO27 for W5500 SPI.
 #
 # If the display stays blank, try:
 #   • Address 0x3D  (some modules ship with this address)
@@ -139,10 +155,12 @@ display:
     update_interval: 1000ms
     lambda: |-
       // ── WiFi Row ──────────────────────────────────────────
-      // MDI icon at x=0 (~11 px). Text centred using TextAlign::TOP_CENTER:
-      //   Connected:    centre = (13+104)/2 = 58  (between icon and bars)
-      //   Disconnected: centre = (13+127)/2 = 70  (between icon and edge)
-      if (wifi::global_wifi_component->is_connected()) {
+      // Ethernet takes priority when available; Wi-Fi is the fallback.
+      // The row shows ETH on wired links and signal bars on Wi-Fi links.
+      if (id(ethernet_net).is_connected()) {
+        it.print(0, 0, id(font8), "ETH");
+        it.print(58, 0, id(font8), TextAlign::TOP_CENTER, id(eth_ip).state.c_str());
+      } else if (wifi::global_wifi_component->is_connected()) {
         it.print(0, 0, id(font_mdi), "\U000F05A9");  // mdi:wifi
         it.print(58, 0, id(font8), TextAlign::TOP_CENTER, id(wifi_ip).state.c_str());
         float rssi = id(wifi_signal_db).state;
@@ -413,7 +431,6 @@ binary_sensor:
       - delayed_on: 50ms
       - delayed_off: 50ms
 
-  # GPIO14 outputs a brief PWM signal at boot; harmless for a reed switch input.
   - platform: gpio
     pin:
       number: GPIO05
@@ -468,10 +485,9 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO25
+      number: GPIO34
       mode:
         input: true
-        pullup: true
     name: "Zone 08"
     id: zone_08
     device_class: window
@@ -481,10 +497,9 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO26
+      number: GPIO35
       mode:
         input: true
-        pullup: true
     name: "Zone 09"
     id: zone_09
     device_class: motion
@@ -494,10 +509,9 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO27
+      number: GPIO36
       mode:
         input: true
-        pullup: true
     name: "Zone 10"
     id: zone_10
     device_class: motion
@@ -505,6 +519,7 @@ binary_sensor:
       - delayed_on: 50ms
       - delayed_off: 50ms
 
+  # GPIO14 outputs a brief PWM signal at boot; harmless for a reed switch input.
   - platform: gpio
     pin:
       number: GPIO14
@@ -520,10 +535,9 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO13
+      number: GPIO39
       mode:
         input: true
-        pullup: true
     name: "Zone 12"
     id: zone_12
     device_class: door
@@ -720,9 +734,13 @@ time:
     id: time_homeassistant_1
 
 text_sensor:
+  - platform: ethernet_info
+    ip_address:
+      name: "Ethernet IP Address"
+      id: eth_ip
   - platform: wifi_info
     ip_address:
-      name: "IP Address"
+      name: "WiFi IP Address"
       id: wifi_ip
     ssid:
       name: "WiFi SSID"
