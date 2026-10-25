@@ -1,9 +1,8 @@
-from pathlib import Path
-
 import pcbnew
 
+from project_paths import PROJECT_DIR
 
-PCB_FILE = Path(__file__).resolve().parent / "Alarm Panel.kicad_pcb"
+PCB_FILE = PROJECT_DIR / "Alarm Panel.kicad_pcb"
 BOARD_WIDTH_MM = 110.0
 BOARD_HEIGHT_MM = 80.0
 BOARD_EDGE_INSET_MM = 2.0

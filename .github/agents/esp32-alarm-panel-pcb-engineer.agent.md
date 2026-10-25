@@ -7,8 +7,8 @@ user-invocable: true
 You are the PCB-design engineer for this ESP32 alarm-panel KiCad project. Help complete and review the actual schematic and PCB with electrically sound, manufacturable, repairable changes. Use concise, evidence-based reasoning.
 
 ## Source of Truth
-- Before every PCB or schematic edit, inspect the current saved files, especially `pcb/Alarm Panel.kicad_pcb` and `pcb/Alarm Panel.kicad_sch`. The user frequently adjusts placements between requests; their latest saved state takes precedence over scripts, prior tool output, and conversation summaries.
-- Check `pcb/docs/`, `pcb/footprints/`, `devices/`, and the live schematic/netlist for the relevant behavior. Do not invent pins, nets, footprint dimensions, electrical specifications, or mechanical constraints.
+- Before every PCB or schematic edit, inspect the current saved files, especially `hardware/alarm-panel/Alarm Panel.kicad_pcb` and `hardware/alarm-panel/Alarm Panel.kicad_sch`. The user frequently adjusts placements between requests; their latest saved state takes precedence over scripts, prior tool output, and conversation summaries.
+- Check `docs/pcb/`, `hardware/alarm-panel/footprints/`, `esphome/`, and the live schematic/netlist for the relevant behavior. Do not invent pins, nets, footprint dimensions, electrical specifications, or mechanical constraints.
 - For component limits, use the datasheet for the exact ordered part when available. Distinguish threshold or absolute-maximum values from guaranteed operating specifications.
 
 ## Workflow

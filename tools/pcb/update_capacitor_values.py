@@ -1,9 +1,8 @@
-from pathlib import Path
-
 import pcbnew
 
+from project_paths import PROJECT_DIR
 
-PCB_FILE = Path(__file__).resolve().parent / "Alarm Panel.kicad_pcb"
+PCB_FILE = PROJECT_DIR / "Alarm Panel.kicad_pcb"
 CAPACITORS = {
     "C1": ("680 uF / 18 V", "12V CAP"),
     "C2": ("470 uF / 10 V", "5V CAP"),

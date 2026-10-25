@@ -2,8 +2,9 @@ import re
 import uuid
 from pathlib import Path
 
+from project_paths import PROJECT_DIR
 
-PCB_DIR = Path(__file__).resolve().parent
+PCB_DIR = PROJECT_DIR
 SCHEMATIC = PCB_DIR / "Alarm Panel.kicad_sch"
 SYMBOL_LIBRARY_DIR = Path(r"C:\Program Files\KiCad\10.0\share\kicad\symbols")
 SYMBOL_ALIASES = {

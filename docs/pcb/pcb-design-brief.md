@@ -3,14 +3,14 @@
 This document translates the current perfboard prototype into a production PCB plan.
 It is based on:
 
-- [devices/alarm-panel-oled.yaml](../../devices/alarm-panel-oled.yaml)
-- photos in [images/](../../images/)
+- [esphome/alarm-panel-oled.yaml](../../esphome/alarm-panel-oled.yaml)
+- photos in [images/](images/)
 
 It captures what is already known, what is inferred, and what still needs confirmation before final manufacturing output (Gerbers, drill files, pick-and-place, and BOM).
 
 ## Known Mechanical Constraints
 
-The existing [3d/Alarm Panel OLED case.stl](../../3d/Alarm%20Panel%20OLED%20case.stl) and [3d/Drawing.png](../../3d/Drawing.png) are historical references only; the enclosure will be redesigned around the finalized PCB.
+The existing [Alarm Panel OLED case.stl](../../hardware/enclosure/3d-printing/legacy/Alarm%20Panel%20OLED%20case.stl) and [enclosure drawing](../../hardware/enclosure/3d-printing/legacy/Drawing.png) are historical references only; the enclosure will be redesigned around the finalized PCB.
 
 Confirmed PCB target:
 
@@ -41,7 +41,7 @@ Create a manufacturable alarm panel controller PCB that:
 
 ## Known Inputs From Current Firmware
 
-Active GPIO map from [devices/alarm-panel-oled.yaml](../../devices/alarm-panel-oled.yaml):
+Active GPIO map from [esphome/alarm-panel-oled.yaml](../../esphome/alarm-panel-oled.yaml):
 
 - W5500 SPI:
   - SCLK: GPIO13
@@ -69,19 +69,19 @@ Active GPIO map from [devices/alarm-panel-oled.yaml](../../devices/alarm-panel-o
 
 ## Known Inputs From Photos
 
-Prototype features visible in [images/top-board-assembled-powered-on.png](../../images/top-board-assembled-powered-on.png):
+Prototype features visible in [images/top-board-assembled-powered-on.png](images/top-board-assembled-powered-on.png):
 
 - 12V barrel jack input.
 - Terminal blocks for zones and power (2.54 mm pitch to match the perfboard-style layout and available space).
 - Terminal-block pins measure about 0.70-0.75 mm; use 0.8 mm as the nominal pin diameter and 1.0 mm through-holes for insertion clearance.
-- Separate power module with selectable output voltage (labeled 12V/9V/5V/3.3V/2.5V/1.8V), shown in [images/power-board-pins.png](../../images/power-board-pins.png).
+- Separate power module with selectable output voltage (labeled 12V/9V/5V/3.3V/2.5V/1.8V), shown in [images/power-board-pins.png](images/power-board-pins.png).
 - MOSFET + gate network for switching 12V alarm/siren circuit.
 - Bulk electrolytic capacitors for power rails.
 
 Barrel-jack reference and dimensions are provided in:
 
-- [images/power-plug-dimensions.png](../../images/power-plug-dimensions.png)
-- [images/power-plug-bottom-angle.png](../../images/power-plug-bottom-angle.png)
+- [images/power-plug-dimensions.png](images/power-plug-dimensions.png)
+- [images/power-plug-bottom-angle.png](images/power-plug-bottom-angle.png)
 
 Use these as the default footprint target for the DC input connector:
 
@@ -94,13 +94,13 @@ Use these as the default footprint target for the DC input connector:
 - User-confirmed pinout: pin 1 is center-positive; pins 2 and 3 are negative/GND.
 - Keep placement consistent with prototype orientation (connector opening at board edge, pins toward board interior).
 
-W5500 module pin labels are visible in [images/w5500-bottom.png](../../images/w5500-bottom.png):
+W5500 module pin labels are visible in [images/w5500-bottom.png](images/w5500-bottom.png):
 
 - 5V, 3.3V, GND, MISO, RST, MOSI, INT, SCS, NC, SCLK.
 
 W5500 mechanical and placement constraints from updated images and prototype notes:
 
-- Module board size: 55.1 mm (X) x 28.1 mm (Y), per the authoritative [images/w5500-drawing.png](../../images/w5500-drawing.png).
+- Module board size: 55.1 mm (X) x 28.1 mm (Y), per the authoritative [images/w5500-drawing.png](images/w5500-drawing.png).
 - Mounting orientation: module is installed upside down on host-board headers.
 - W5500 module board right edge aligns flush with the host PCB right edge.
 - Cut an edge-open notch from the host PCB's right edge for the RJ45 housing, with 1.0 mm clearance on its inboard, top, and bottom sides.
@@ -113,7 +113,7 @@ W5500 mechanical and placement constraints from updated images and prototype not
 - RJ45 body: 21.8 mm x 16.2 mm, centered along the module short axis, with a 3.5 mm bump beyond the module's long edge.
 - The W5500 module PCB right edge is flush with the host PCB edge; the RJ45 housing sits in the edge notch and protrudes 3.5 mm beyond the module/host edge. The redesigned case must support the overhanging module and clear the notch/housing.
 
-W5500 2x5 header mapping (from underside silkscreen in [images/w5500-bottom.png](../../images/w5500-bottom.png)):
+W5500 2x5 header mapping (from underside silkscreen in [images/w5500-bottom.png](images/w5500-bottom.png)):
 
 - Left column (top to bottom): `5V`, `GND`, `RST`, `INT`, `NC`
 - Right column (top to bottom): `3.3V`, `MISO`, `MOSI`, `SCS`, `SCLK`
@@ -138,7 +138,7 @@ Power module placement and header orientation are confirmed from the prototype p
 - EN is pin 1 and is unused; pins 2/3 are the 12V input, and pins 4/5 are the 5V output.
 - Verify the module's printed labels and input/output polarity against the exact converter board before power-up.
 
-ESP32 module orientation and silkscreen pin labels are confirmed from [images/esp-wroom-32-ideaspark-pinout.png](../../images/esp-wroom-32-ideaspark-pinout.png):
+ESP32 module orientation and silkscreen pin labels are confirmed from [images/esp-wroom-32-ideaspark-pinout.png](images/esp-wroom-32-ideaspark-pinout.png):
 
 - Module board size: 58 mm (W) x 31.5 mm (H).
 - Orientation: horizontal, with USB connector on the right side.

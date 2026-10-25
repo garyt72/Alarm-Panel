@@ -1,12 +1,11 @@
-from pathlib import Path
-
 import pcbnew
 
 import repair_schematic_metadata as metadata
 import wire_schematic_pins as wiring
+from project_paths import PROJECT_DIR
 
 
-PCB_DIR = Path(__file__).resolve().parent
+PCB_DIR = PROJECT_DIR
 PCB_FILE = PCB_DIR / "Alarm Panel.kicad_pcb"
 PIN_ORDER = {"1": "EN", "2": "IN+", "3": "IN-", "4": "OUT-", "5": "OUT+"}
 PIN_NETS = {"1": "NC", "2": "12V", "3": "GND", "4": "GND", "5": "5V"}

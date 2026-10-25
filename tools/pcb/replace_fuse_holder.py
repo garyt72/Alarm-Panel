@@ -2,8 +2,9 @@ from pathlib import Path
 
 import pcbnew
 
+from project_paths import PROJECT_DIR
 
-PCB_DIR = Path(__file__).resolve().parent
+PCB_DIR = PROJECT_DIR
 PCB_FILE = PCB_DIR / "Alarm Panel.kicad_pcb"
 FOOTPRINT_LIBRARY = PCB_DIR / "footprints" / "AlarmPanel_THT.pretty"
 

@@ -29,7 +29,7 @@ The adjacent `fp-lib-table` loads this library automatically when opening `Alarm
 
 The ESP32 carrier outline is 58 mm x 31.5 mm. Its 15-pin header rows are confirmed at 27.94 mm center-to-center (11 x 2.54 mm standard spacing).
 
-The W5500 footprint follows `images/w5500-drawing.png`: 55.1 mm x 28.1 mm module outline, five pin pairs at 2.54 mm pitch, and 1.0 mm drills for the approximately 0.75 mm pins. Pin 1 is 2.8 mm from the short edge and 15.64 mm from the top edge; the bottom row center is 2.3 mm from the long edge. The RJ45 body is 21.8 mm x 16.2 mm, centered on the module short axis, with a 3.5 mm bump beyond the module edge. The W5500 module right edge is flush with the host PCB; the RJ45 housing occupies the edge notch with 1 mm clearance on its three inboard sides.
+The W5500 footprint follows [the reference drawing](../../../docs/pcb/images/w5500-drawing.png): 55.1 mm x 28.1 mm module outline, five pin pairs at 2.54 mm pitch, and 1.0 mm drills for the approximately 0.75 mm pins. Pin 1 is 2.8 mm from the short edge and 15.64 mm from the top edge; the bottom row center is 2.3 mm from the long edge. The RJ45 body is 21.8 mm x 16.2 mm, centered on the module short axis, with a 3.5 mm bump beyond the module edge. The W5500 module right edge is flush with the host PCB; the RJ45 housing occupies the edge notch with 1 mm clearance on its three inboard sides.
 
 The mounting-hole footprint is used by the mechanical PCB baseline.
 

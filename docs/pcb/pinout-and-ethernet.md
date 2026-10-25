@@ -1,6 +1,6 @@
 # Alarm Panel Final Pin-Out and W5500 Wiring
 
-This document records the final ESP32 pin usage in [devices/alarm-panel-oled.yaml](../../devices/alarm-panel-oled.yaml). The design keeps the W5500 Ethernet module and uses ten alarm zones to avoid boot-strapping and programming/debug pins.
+This document records the final ESP32 pin usage in [esphome/alarm-panel-oled.yaml](../../esphome/alarm-panel-oled.yaml). The design keeps the W5500 Ethernet module and uses ten alarm zones to avoid boot-strapping and programming/debug pins.
 
 ## Design Goals
 

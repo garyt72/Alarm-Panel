@@ -1,12 +1,12 @@
-from pathlib import Path
 import math
 
 import pcbnew
 
 from add_pin_labels import J9_CARRIER_NAMES, label_text, placement
+from project_paths import PROJECT_DIR
 
 
-PCB_FILE = Path(__file__).resolve().parent / "Alarm Panel.kicad_pcb"
+PCB_FILE = PROJECT_DIR / "Alarm Panel.kicad_pcb"
 LEGACY_J9_LABEL_ROWS_MM = (38.5, 61.0)
 
 

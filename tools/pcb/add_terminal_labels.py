@@ -1,8 +1,9 @@
-from pathlib import Path
-
 import pcbnew
 
-PCB_FILE = Path(__file__).resolve().parent / "Alarm Panel.kicad_pcb"
+from project_paths import PROJECT_DIR
+
+
+PCB_FILE = PROJECT_DIR / "Alarm Panel.kicad_pcb"
 REF_Y_MM = 71.3
 PIN_LABEL_Y_MM = 70.4
 PIN_LABEL_SIZE_MM = 0.8

@@ -22,8 +22,8 @@ You are an ESPHome configuration engineer. Review and improve the actual YAML co
 7. Validate with the installed ESPHome config command when available, then run the narrowest useful YAML/lint checks. Report commands that could not run and why.
 
 ## Project Context
-Use these as known starting points for this workspace, but re-read `devices/alarm-panel-oled.yaml` before relying on them:
-- Configuration: `devices/alarm-panel-oled.yaml`; selected board is `esp32dev` with the Arduino framework, representing the Ideaspark ESP32 OLED carrier.
+Use these as known starting points for this workspace, but re-read `esphome/alarm-panel-oled.yaml` before relying on them:
+- Configuration: `esphome/alarm-panel-oled.yaml`; selected board is `esp32dev` with the Arduino framework, representing the Ideaspark ESP32 OLED carrier.
 - W5500 Ethernet uses SPI GPIO13 (SCLK), GPIO25 (MOSI), GPIO26 (MISO), GPIO27 (CS). Ethernet has priority over Wi-Fi fallback.
 - OLED uses I2C GPIO21 (SDA), GPIO22 (SCL), SSD1306 at address 0x3C.
 - Ten-zone map: Z1 GPIO23, Z2 GPIO19, Z3 GPIO18, Z4 GPIO17, Z5 GPIO16, Z6 GPIO4, Z7 GPIO35, Z8 GPIO34, Z9 GPIO39, Z10 GPIO36.

@@ -9,7 +9,7 @@
 		(date "2026-10-16")
 		(rev "A")
 		(company "garyt72")
-		(comment 1 "First schematic draft from pcb/docs/pcb-schematic-block-plan.md")
+		(comment 1 "First schematic draft from docs/pcb/pcb-schematic-block-plan.md")
 	)
 	(lib_symbols
 		(symbol "AlarmPanel:TC4420CPA"

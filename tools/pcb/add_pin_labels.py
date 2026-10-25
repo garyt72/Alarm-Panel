@@ -1,10 +1,9 @@
-from pathlib import Path
-
 import pcbnew
 
+from project_paths import PROJECT_DIR
 from wire_schematic_pins import PIN_NETS
 
-PCB_FILE = Path(__file__).resolve().parent / "Alarm Panel.kicad_pcb"
+PCB_FILE = PROJECT_DIR / "Alarm Panel.kicad_pcb"
 GROUP_NAME = "pin-labels"
 REFS = ("J8", "J10", "U1", "Q1")
 OFFSET_MM = 1.8

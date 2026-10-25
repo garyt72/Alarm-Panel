@@ -14,6 +14,6 @@ __pycache__/
 *.kicad_sch-bak
 *.kicad_pro-bak
 *.lck
-/pcb/*.net
+/hardware/alarm-panel/*.net
 *-drc.rpt
 *-erc.rpt

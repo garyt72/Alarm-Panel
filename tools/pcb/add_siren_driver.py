@@ -4,9 +4,10 @@ import uuid
 import pcbnew
 
 import repair_schematic_metadata as metadata
+from project_paths import PROJECT_DIR
 
 
-PCB_DIR = Path(__file__).resolve().parent
+PCB_DIR = PROJECT_DIR
 PCB_FILE = PCB_DIR / "Alarm Panel.kicad_pcb"
 STANDARD_FOOTPRINTS = Path(r"C:\Program Files\KiCad\10.0\share\kicad\footprints")
 PARTS = [
