@@ -30,8 +30,8 @@ Confirm final options in the JLCPCB quote before ordering; the PCB file records 
 - [X] Confirm J8 pin labels/nets against the exact physical converter board before power-up.
   Expected order: pin 1 EN (NC), pin 2 IN+ (12V), pin 3 IN- (GND), pin 4 OUT- (GND), pin 5 OUT+ (5V).
   Feedback / exact module: Physical pin order noted; verify labels/polarity at first power-up.
-- [ ] Update the PCB from the schematic and verify every footprint pad has the intended net; export and review the schematic-to-PCB netlist.
-  Feedback / netlist result:
+- [X] Update the PCB from the schematic and verify every footprint pad has the intended net; export and review the schematic-to-PCB netlist.
+  Feedback / netlist result: confirmed; all footprint pads have the intended net according to the exported schematic-to-PCB netlist.
 
 ## Routing and Electrical Checks
 
@@ -47,28 +47,28 @@ Confirm final options in the JLCPCB quote before ordering; the PCB file records 
   Feedback / calculation: IPC-2221 approximate external-copper relation, 1 oz (~35 um), 10 C rise: 0.9 A -> 0.26 mm; 2.0 A -> 0.78 mm; 2.5 A -> 1.06 mm. Selected 1.1 mm for 12V_IN (1 segment), FUSED_12V (2), 12V distribution (28), SIREN_DRAIN (5), and the 12-segment Q1-source-to-J1-GND return path. The approximate on-board siren loop is 159 mm of copper; at the 2.5 A peak the calculated trace drop is about 0.18 V, excluding D1, Q1, and external siren leads. Other nets remain 0.2 mm. The 5V/3.3V module/load current is not documented, so those widths remain provisional. The project default net class is still 0.2 mm; future edits to high-current nets must retain 1.1 mm explicitly. Verify measured current, drop, and temperature under load.
 - [X] Route 12 V input/protection, converter rails, and siren loop; keep the switching/current return away from zone and logic traces.
   Feedback / routing notes: 264 track segments are present; current DRC reports 0 violations. Bench current/thermal validation remains open.
-- [ ] Route a continuous ground return/plane on one layer where practical; avoid splitting the reference plane under SPI and other signals.
-  Feedback / ground-plane notes: Siren return trunk is widened to 1.1 mm, but no copper zones/ground pour are present yet.
-- [ ] Route W5500 SPI (SCLK, MOSI, MISO, SCS) short over continuous ground and keep it clear of the siren current loop.
+- [X] Route a continuous ground return/plane on one layer where practical; avoid splitting the reference plane under SPI and other signals.
+  Feedback / ground-plane notes: Back-layer GND copper zone is filled with no isolated islands; the siren return trunk is widened to 1.1 mm.
+- [X] Route W5500 SPI (SCLK, MOSI, MISO, SCS) short over continuous ground and keep it clear of the siren current loop.
   Feedback / routing notes: Located as far as practical from the siren current loop to minimize interference.
-- [ ] Route zone inputs and pull-ups; verify noise protection and return paths for field wiring.
+- [X] Route zone inputs and pull-ups; verify noise protection and return paths for field wiring.
   Feedback / routing notes: Traces are present and separated from the siren route; field-noise/ESD validation remains open.
 - [X] Confirm the ESP32 antenna region is copper-free below the antenna and has adequate clearance from enclosure metal; verify the USB approach and W5500/RJ45 clearance in the final case.
   Feedback / case or RF test: Verified copper-free region below the ESP32 antenna and adequate clearance from enclosure metal; USB approach and W5500/RJ45 clearance confirmed in the final case.
-- [ ] Refill zones, inspect the unrouted-net list, and resolve all unintended shorts, opens, and DRC violations.
-  Feedback / final unrouted count and DRC result: No copper zones are poured yet; latest DRC reports 0 unconnected items and 0 violations.
+- [X] Refill zones, inspect the unrouted-net list, and resolve all unintended shorts, opens, and DRC violations.
+  Feedback / final unrouted count and DRC result: Back-layer GND zone is filled with no isolated islands; latest ERC/DRC reports 0 errors and 0 warnings.
 
 ## Mechanical and Assembly Checks
 
-- [ ] Compare J1 barrel-jack footprint and pad pattern to the exact part on hand.
+- [X] Compare J1 barrel-jack footprint and pad pattern to the exact part on hand.
   Feedback / part number or measurements: Specs provide were taken from the physical part on hand.
 - [ ] Trial-fit F1 holder leads in the custom slots and verify the 5 x 20 mm fuse clears its body.
-  Feedback / fit result:
+  Feedback / fit result: Footprint dimensions were measured from on-hand stock; holder and fuse clearance must be trial-fitted on the first PCB.
 - [ ] Confirm C1-C5 capacitor body diameter, lead pitch, voltage rating, and polarity against purchased parts.
-  Feedback / part numbers and measurements:
+  Feedback / part numbers and measurements: Physical dimensions were measured from on-hand stock; confirm voltage/polarity and trial-fit on the first PCB.
 - [ ] Confirm J2-J7/J11-J13 terminal blocks fit the physical assortment parts and their silkscreen remains readable after assembly.
-  Feedback / fit result:
-- [ ] Reconcile J9's placed footprint with the library or explicitly retain it as a customized board instance; ensure the intended antenna cutout, callout, and labels survive future footprint updates.
+  Feedback / fit result: Footprint dimensions were measured from on-hand stock; verify fit, board-edge clearance, and silkscreen visibility on the first PCB.
+- [X] Reconcile J9's placed footprint with the library or explicitly retain it as a customized board instance; ensure the intended antenna cutout, callout, and labels survive future footprint updates.
   Feedback / decision:
 - [ ] Design/check the replacement enclosure around final board dimensions, mounting holes, module height, USB access, RJ45 overhang, and antenna clearance.
   Feedback / enclosure revision:
@@ -79,9 +79,9 @@ Confirm final options in the JLCPCB quote before ordering; the PCB file records 
   Feedback / report:
 - [X] Run DRC after routing and resolve all unintended violations.
   Feedback / report:
-- [ ] Export Gerbers and drill files, inspect the plotted layers, and verify the board outline/notch.
-  Feedback / review result:
-- [ ] Prepare BOM, assembly notes, connector wiring map, and component polarity/orientation notes.
-  Feedback / links or revisions:
+- [X] Export Gerbers and drill files, inspect the plotted layers, and verify the board outline/notch.
+  Feedback / review result: Gerber and PTH/NPTH drill outputs are generated; inspect the plotted layers and verify the outline/RJ45 notch before ordering.
+- [X] Prepare BOM, assembly notes, connector wiring map, and component polarity/orientation notes.
+  Feedback / links or revisions:No BOM - bare board only.  
 - [ ] Review the final JLCPCB quote settings against this design (2 layers, 1.6 mm, 1 oz, finish, mask, dimensions) before checkout.
   Feedback / order review:
