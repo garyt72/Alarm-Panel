@@ -1,7 +1,7 @@
 esphome:
   name: alarm-panel-oled
   friendly_name: Alarm Panel (OLED)
-  comment: "ideaspark ESP32 0.96in OLED — 12 zone alarm panel replacement"
+  comment: "ideaspark ESP32 0.96in OLED — 10 zone alarm panel replacement"
   project:
     name: "diy.alarm-panel-oled"
     version: "1.0.0"
@@ -65,21 +65,25 @@ button:
 # AVOIDED:
 #   GPIO 0        — strapping pin (LOW = flash mode)
 #   GPIO 1        — UART0 TX (logger / programming)
-#   GPIO 2        — strapping pin; safe as output AFTER boot only
+#   GPIO 2        — strapping pin; not configured by this firmware
+#   GPIO 5        — strapping pin; avoided for field inputs
 #   GPIO 3        — UART0 RX (logger / programming)
 #   GPIO 6–11     — internal SPI flash (NEVER USE)
 #   GPIO 12       — strapping pin (HIGH at boot = wrong flash voltage)
 #   GPIO 15       — strapping pin (UART0 output enable)
+#   GPIO 14       — brief boot-time PWM transient; left unused
 #   GPIO 21       — I2C SDA (integrated OLED display)
 #   GPIO 22       — I2C SCL (integrated OLED display)
 #
-# ZONE INPUTS (internal pull-up, Normally Closed reed switches):
-#   GPIO 4,5,14,16,17,18,19,23,34,35,36,39 — Zones 01–12
+# ZONE INPUTS (Normally Closed reed switches):
+#   GPIO 4,16,17,18,19,23,34,35,36,39 — Zones 01–10
+#   GPIO34/35/36/39 are input-only and require external 3.3V pull-ups.
 #
 # OUTPUTS:
 #   GPIO 32       — Siren / alarm relay output
 #   GPIO 33       — Armed status indicator LED output
-#   GPIO 2        — Onboard LED (active-LOW on most ESP32 dev boards)
+# GPIO2 onboard LED is not configured because GPIO2 is a strapping pin.
+# The LED remains physically attached on the carrier; verify its boot loading.
 # ==============================================================
 
 # ==============================================================
@@ -135,8 +139,6 @@ font:
 # Zone display labels (fixed horizontal positions, zone slot = 7 px):
 #   Zones 01–09 → "1"–"9"
 #   Zone  10    → "A"   (hex-style to keep single-character width)
-#   Zone  11    → "B"
-#   Zone  12    → "C"
 #
 # Each label occupies a fixed x position. When a zone is open (reed
 # switch circuit broken) the label rises into the Open row; when the
@@ -144,7 +146,7 @@ font:
 #
 # x positions (label start x=37, 7 px per slot):
 #   Z01=37  Z02=44  Z03=51  Z04=58  Z05=65  Z06=72
-#   Z07=79  Z08=86  Z09=93  Z10=100 Z11=107 Z12=114
+#   Z07=79  Z08=86  Z09=93  Z10=100
 # ==============================================================
 
 display:
@@ -184,29 +186,29 @@ display:
       // ── Zone Characters ───────────────────────────────────
       // Each zone occupies a fixed x column. The label appears in the
       // Open row (y=16) when the zone is triggered, or the Closed row
-      // (y=32) when normal. Zones 10-12 use A/B/C to stay single-width.
+      // (y=32) when normal. Zone 10 uses A to stay single-width.
       // Disabled zones render nothing — their column stays blank.
-      const bool states[12] = {
+      const bool states[10] = {
         id(zone_01).state, id(zone_02).state, id(zone_03).state,
         id(zone_04).state, id(zone_05).state, id(zone_06).state,
         id(zone_07).state, id(zone_08).state, id(zone_09).state,
-        id(zone_10).state, id(zone_11).state, id(zone_12).state
+        id(zone_10).state
       };
-      const bool enabled[12] = {
+      const bool enabled[10] = {
         id(sw_zone_01).state, id(sw_zone_02).state, id(sw_zone_03).state,
         id(sw_zone_04).state, id(sw_zone_05).state, id(sw_zone_06).state,
         id(sw_zone_07).state, id(sw_zone_08).state, id(sw_zone_09).state,
-        id(sw_zone_10).state, id(sw_zone_11).state, id(sw_zone_12).state
+        id(sw_zone_10).state
       };
-      const char* labels[12] = {
-        "1","2","3","4","5","6","7","8","9","A","B","C"
+      const char* labels[10] = {
+        "1","2","3","4","5","6","7","8","9","A"
       };
       const int open_y = 16;
       const int clsd_y = 32;
       const int x0     = 37;
       const int slot   =  7;
 
-      for (int i = 0; i < 12; i++) {
+      for (int i = 0; i < 10; i++) {
         if (enabled[i]) {
           it.print(x0 + i * slot, states[i] ? open_y : clsd_y, id(font8), labels[i]);
         }
@@ -240,11 +242,6 @@ output:
   - platform: gpio
     pin: GPIO33
     id: out_armed_led
-
-  # GPIO2 is a strapping pin; safe as output after boot.
-  - platform: gpio
-    pin: GPIO2
-    id: out_onboard_led
 
 switch:
   - platform: output
@@ -335,53 +332,11 @@ switch:
     entity_category: config
     restore_mode: RESTORE_DEFAULT_ON
     icon: "mdi:shield-check-outline"
-  - platform: template
-    name: "Zone 11 Enabled"
-    id: sw_zone_11
-    optimistic: true
-    entity_category: config
-    restore_mode: RESTORE_DEFAULT_ON
-    icon: "mdi:shield-check-outline"
-  - platform: template
-    name: "Zone 12 Enabled"
-    id: sw_zone_12
-    optimistic: true
-    entity_category: config
-    restore_mode: RESTORE_DEFAULT_ON
-    icon: "mdi:shield-check-outline"
-
-light:
-  - platform: binary
-    name: "Status LED"
-    id: status_led
-    output: out_onboard_led
-    effects:
-      - strobe:
-          name: "Armed Away Blink"
-          colors:
-            - state: true
-              duration: 100ms
-            - state: false
-              duration: 1900ms
-      - strobe:
-          name: "Alarm Flash"
-          colors:
-            - state: true
-              duration: 100ms
-            - state: false
-              duration: 100ms
-      - strobe:
-          name: "Arming Blink"
-          colors:
-            - state: true
-              duration: 500ms
-            - state: false
-              duration: 500ms
-
 # ==============================================================
-# ZONE SENSORS  (12 zones — GPIO21/22 reserved for OLED I2C)
+# ZONE SENSORS  (10 zones — GPIO21/22 reserved for OLED I2C)
 # ==============================================================
-# Wiring (all zones use internal pull-up):
+# Wiring uses normally-closed contacts to GND. GPIO34/35/36/39 are input-only
+# and require external 3.3V pull-ups; other active zone GPIOs use internal pulls.
 #   • Normally Closed (NC) reed switches — standard security wiring.
 #   • One terminal → GPIO pin  /  other terminal → GND.
 #   • Door/window CLOSED + magnet near  → switch CLOSED → pin LOW  → sensor OFF
@@ -433,7 +388,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO05
+      number: GPIO17
       mode:
         input: true
         pullup: true
@@ -446,7 +401,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO17
+      number: GPIO16
       mode:
         input: true
         pullup: true
@@ -459,7 +414,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO16
+      number: GPIO04
       mode:
         input: true
         pullup: true
@@ -472,10 +427,9 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO04
+      number: GPIO35
       mode:
         input: true
-        pullup: true
     name: "Zone 07"
     id: zone_07
     device_class: window
@@ -497,7 +451,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: GPIO35
+      number: GPIO39
       mode:
         input: true
     name: "Zone 09"
@@ -515,32 +469,6 @@ binary_sensor:
     name: "Zone 10"
     id: zone_10
     device_class: motion
-    filters:
-      - delayed_on: 50ms
-      - delayed_off: 50ms
-
-  # GPIO14 outputs a brief PWM signal at boot; harmless for a reed switch input.
-  - platform: gpio
-    pin:
-      number: GPIO14
-      mode:
-        input: true
-        pullup: true
-    name: "Zone 11"
-    id: zone_11
-    device_class: window
-    filters:
-      - delayed_on: 50ms
-      - delayed_off: 50ms
-
-  - platform: gpio
-    pin:
-      number: GPIO39
-      mode:
-        input: true
-    name: "Zone 12"
-    id: zone_12
-    device_class: door
     filters:
       - delayed_on: 50ms
       - delayed_off: 50ms
@@ -589,15 +517,6 @@ binary_sensor:
     id: zone_10_alarm
     internal: true
     lambda: return id(sw_zone_10).state && id(zone_10).state;
-  - platform: template
-    id: zone_11_alarm
-    internal: true
-    lambda: return id(sw_zone_11).state && id(zone_11).state;
-  - platform: template
-    id: zone_12_alarm
-    internal: true
-    lambda: return id(sw_zone_12).state && id(zone_12).state;
-
   # Panel connectivity indicator
   - platform: status
     name: "Panel Online"
@@ -660,52 +579,33 @@ alarm_control_panel:
         bypass_armed_home: true
       - input: zone_10_alarm      # Motion — bypass when home
         bypass_armed_home: true
-      - input: zone_11_alarm
-        bypass_armed_home: true
-      - input: zone_12_alarm      # Perimeter
-        bypass_armed_home: false
-
     on_triggered:
       then:
         - switch.turn_on: siren
-        - light.turn_on:
-            id: status_led
-            effect: "Alarm Flash"
 
     on_arming:
       then:
         - switch.turn_off: siren
         - switch.turn_off: armed_led
-        - light.turn_on:
-            id: status_led
-            effect: "Arming Blink"
 
     on_armed_away:
       then:
         - switch.turn_off: siren
         - switch.turn_on: armed_led
-        - light.turn_on:
-            id: status_led
-            effect: "Armed Away Blink"
 
     on_armed_home:
       then:
         - switch.turn_off: siren
         - switch.turn_on: armed_led
-        - light.turn_off: status_led
 
     on_disarmed:
       then:
         - switch.turn_off: siren
         - switch.turn_off: armed_led
-        - light.turn_off: status_led
 
     on_pending:
       then:
         - switch.turn_off: siren
-        - light.turn_on:
-            id: status_led
-            effect: "Arming Blink"
 
 # ==============================================================
 # DIAGNOSTICS
