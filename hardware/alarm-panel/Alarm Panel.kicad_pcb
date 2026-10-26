@@ -13436,7 +13436,7 @@
 			(justify left)
 		)
 	)
-	(gr_text "Alarm Panel (OLED)\nby Gary Taylor\nv1.0.0"
+	(gr_text "Alarm Panel (OLED)\nby Gary Taylor\nv1.1.0"
 		(at 32.5 35 0)
 		(layer "F.SilkS")
 		(uuid "dd77af37-7b02-422a-8d4d-09c5af4c3b35")
