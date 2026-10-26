@@ -89,7 +89,6 @@
 		)
 		(capping no)
 		(filling no)
-		(zone_defaults)
 		(pcbplotparams
 			(layerselection 0x00000000_00000000_55555555_5755f5ff)
 			(plot_on_all_layers_selection 0x00000000_00000000_00000000_00000000)
@@ -9122,14 +9121,48 @@
 		(path "/22222222-2222-2222-2222-222222222222")
 		(sheetname "/")
 		(sheetfile "Alarm Panel.kicad_sch")
-		(units
-			(unit
-				(name "A")
-				(pins "1" "2")
-			)
-		)
 		(attr through_hole)
 		(duplicate_pad_numbers_are_jumpers no)
+		(fp_line
+			(start -12 -5)
+			(end 12 -5)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "d81f2e5c-d8e5-4b95-a1ce-69f515cfb989")
+		)
+		(fp_line
+			(start -12 5)
+			(end -12 -5)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "67a3e853-2d5d-414c-ae52-eafdc60c4459")
+		)
+		(fp_line
+			(start 12 -5)
+			(end 12 5)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "0f8c04be-631d-4d9b-bb8b-bc689fc06c04")
+		)
+		(fp_line
+			(start 12 5)
+			(end -12 5)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(layer "F.SilkS")
+			(uuid "8c27dc38-63e3-46e1-81d8-df6758da3f71")
+		)
 		(fp_line
 			(start -12.25 -5.25)
 			(end 12.25 -5.25)
@@ -9169,46 +9202,6 @@
 			)
 			(layer "F.CrtYd")
 			(uuid "47a026b9-d474-485c-8d5a-2b861324565c")
-		)
-		(fp_line
-			(start -12 -5)
-			(end 12 -5)
-			(stroke
-				(width 0.1)
-				(type solid)
-			)
-			(layer "F.Fab")
-			(uuid "d81f2e5c-d8e5-4b95-a1ce-69f515cfb989")
-		)
-		(fp_line
-			(start -12 5)
-			(end -12 -5)
-			(stroke
-				(width 0.1)
-				(type solid)
-			)
-			(layer "F.Fab")
-			(uuid "67a3e853-2d5d-414c-ae52-eafdc60c4459")
-		)
-		(fp_line
-			(start 12 -5)
-			(end 12 5)
-			(stroke
-				(width 0.1)
-				(type solid)
-			)
-			(layer "F.Fab")
-			(uuid "0f8c04be-631d-4d9b-bb8b-bc689fc06c04")
-		)
-		(fp_line
-			(start 12 5)
-			(end -12 5)
-			(stroke
-				(width 0.1)
-				(type solid)
-			)
-			(layer "F.Fab")
-			(uuid "8c27dc38-63e3-46e1-81d8-df6758da3f71")
 		)
 		(pad "1" thru_hole rect
 			(at -11.8 0)
