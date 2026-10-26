@@ -12905,7 +12905,7 @@
 		)
 	)
 	(gr_text "1u"
-		(at 37.3 53.54 90)
+		(at 40.5 53.54 90)
 		(layer "F.SilkS")
 		(uuid "205ca553-be88-4ae3-80fa-27804692e640")
 		(effects
