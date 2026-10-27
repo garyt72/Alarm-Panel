@@ -1,10 +1,5 @@
 (fp_lib_table
-  (version 7)
-  (lib
-    (name "AlarmPanel_THT")
-    (type "KiCad")
-    (uri "${KIPRJMOD}/footprints/AlarmPanel_THT.pretty")
-    (options "")
-    (descr "Project-local through-hole footprints for the Alarm Panel PCB")
-  )
+	(version 7)
+	(lib (name "AlarmPanel_THT") (type "KiCad") (uri "${KIPRJMOD}/footprints/AlarmPanel_THT.pretty") (options "") (descr "Project-local through-hole footprints for the Alarm Panel PCB"))
+	(lib (name "Custom") (type "KiCad") (uri "C:/Users/Gary/OneDrive/Documents/KiCad/10.0/footprints/Custom.pretty") (options "") (descr ""))
 )
