@@ -1,24 +1,185 @@
 (footprint "FuseHolder_Body24x10_P23.6mm"
-	(version 20240108)
+	(version 20260206)
 	(generator "pcbnew")
+	(generator_version "10.0")
 	(layer "F.Cu")
 	(descr "THT two-pin fuse holder, body 24 x 10 x 6.25 mm, drawing-confirmed 23.6 mm pitch, 0.4 x 1.4 mm leads")
 	(tags "fuse holder THT 2-pin 23.6mm")
+	(property "Reference" "F1"
+		(at 0 -7.5 0)
+		(layer "F.SilkS")
+		(uuid "56ea3f52-59a0-4b59-8318-8541865b67fa")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "2A TIME-DELAY 5x20mm"
+		(at 0 7.5 0)
+		(layer "F.Fab")
+		(uuid "414e3696-0a29-466f-b473-94fed9f29c20")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "b2f03ac3-0f61-45bf-a00d-6009710ef3de")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "3c13be75-4640-402c-9ecb-da797acd8e44")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property ki_fp_filters "*Fuse*")
+	(sheetname "/")
+	(sheetfile "Alarm Panel.kicad_sch")
 	(attr through_hole)
-	(fp_text reference "REF**" (at 0 -7.5 0) (layer "F.SilkS")
-		(effects (font (size 1 1) (thickness 0.15)))
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -12 -5)
+		(end -12 -1.3)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "6af94926-5971-4116-8cdf-87419a700659")
 	)
-	(fp_text value "FuseHolder_24x10" (at 0 7.5 0) (layer "F.Fab")
-		(effects (font (size 1 1) (thickness 0.15)))
+	(fp_line
+		(start -12 -5)
+		(end 12 -5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "036f4579-2386-4128-8744-09fec7f977df")
 	)
-	(fp_line (start -12 -5) (end 12 -5) (layer "F.Fab") (width 0.1))
-	(fp_line (start 12 -5) (end 12 5) (layer "F.Fab") (width 0.1))
-	(fp_line (start 12 5) (end -12 5) (layer "F.Fab") (width 0.1))
-	(fp_line (start -12 5) (end -12 -5) (layer "F.Fab") (width 0.1))
-	(fp_line (start -12.25 -5.25) (end 12.25 -5.25) (layer "F.CrtYd") (width 0.05))
-	(fp_line (start 12.25 -5.25) (end 12.25 5.25) (layer "F.CrtYd") (width 0.05))
-	(fp_line (start 12.25 5.25) (end -12.25 5.25) (layer "F.CrtYd") (width 0.05))
-	(fp_line (start -12.25 5.25) (end -12.25 -5.25) (layer "F.CrtYd") (width 0.05))
-	(pad "1" thru_hole rect (at -11.8 0) (size 2.4 2.4) (drill oval 0.6 1.6) (layers "*.Cu" "*.Mask"))
-	(pad "2" thru_hole circle (at 11.8 0) (size 2.4 2.4) (drill oval 0.6 1.6) (layers "*.Cu" "*.Mask"))
+	(fp_line
+		(start -12 5)
+		(end -12 1.3)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "935c96d2-819e-4650-a887-a9c3e32eb8c1")
+	)
+	(fp_line
+		(start 12 -5)
+		(end 12 -1.3)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "3aa8456f-f639-40d9-b89b-4f4bd8ed17f6")
+	)
+	(fp_line
+		(start 12 5)
+		(end -12 5)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "d3bba048-a76a-430f-9220-c9b02ca19254")
+	)
+	(fp_line
+		(start 12 5)
+		(end 12 1.3)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "da37950b-1a63-48f6-900d-fd351b2aff53")
+	)
+	(fp_line
+		(start -12.25 -5.25)
+		(end 12.25 -5.25)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "95441d30-a2a0-4187-94d0-f9bcf4ea7149")
+	)
+	(fp_line
+		(start -12.25 5.25)
+		(end -12.25 -5.25)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "30c608d5-72bd-4a38-96d4-4a0cfbe4cca6")
+	)
+	(fp_line
+		(start 12.25 -5.25)
+		(end 12.25 5.25)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "d1e54f78-d43f-4eb7-8efe-f4fed352ec4f")
+	)
+	(fp_line
+		(start 12.25 5.25)
+		(end -12.25 5.25)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "fa9ad51e-321a-4a7b-b354-7abe7d3eb1ab")
+	)
+	(pad "1" thru_hole rect
+		(at -11.8 0)
+		(size 2.4 2.4)
+		(drill oval 0.6 1.6)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "86b79d48-bfc1-4c6d-86a6-35a38bb6b0f4")
+	)
+	(pad "2" thru_hole circle
+		(at 11.8 0)
+		(size 2.4 2.4)
+		(drill oval 0.6 1.6)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "020606c5-5301-4665-8912-cacd16e0bdf1")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/3d-models/Fuse Holder.step"
+		(offset
+			(xyz -12 -5 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -0)
+		)
+	)
 )

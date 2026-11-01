@@ -6949,7 +6949,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "AlarmPanel_THT:FuseHolder_Body24x10_P23.6mm"
+		(property "Footprint" "Custom:FuseHolder_Body24x10_P23.6mm"
 			(at 118.11 77.47 0)
 			(hide yes)
 			(show_name no)
@@ -7096,7 +7096,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "680 uF / 18 V"
+		(property "Value" "680 uF / 16 V"
 			(at 104.14 100.68 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7107,7 +7107,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_THT:CP_Radial_D8.0mm_P3.80mm"
+		(property "Footprint" "Custom:CP_Radial_D8.0mm_P3.50mm"
 			(at 104.14 106.68 0)
 			(hide yes)
 			(show_name no)
@@ -7128,8 +7128,9 @@
 				)
 			)
 		)
-		(property "Description" ""
-			(at 104.14 106.68 0)
+		(property "Description" "Polarized capacitor"
+			(at 116.332 106.68 0)
+			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7450,7 +7451,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_THT:CP_Radial_D8.0mm_P3.80mm"
+		(property "Footprint" "Custom:CP_Radial_D6.3mm_P2.50mm"
 			(at 105.41 124.46 0)
 			(hide yes)
 			(show_name no)
@@ -7688,7 +7689,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_THT:CP_Radial_D8.0mm_P3.80mm"
+		(property "Footprint" "Custom:CP_Radial_D6.3mm_P2.50mm"
 			(at 166.37 161.29 0)
 			(hide yes)
 			(show_name no)
