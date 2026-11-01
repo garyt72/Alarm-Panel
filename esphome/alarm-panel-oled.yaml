@@ -155,6 +155,7 @@ display:
     address: 0x3C
     id: oled_display
     update_interval: 1000ms
+    rotation: 180°
     lambda: |-
       // ── WiFi Row ──────────────────────────────────────────
       // Ethernet takes priority when available; Wi-Fi is the fallback.
